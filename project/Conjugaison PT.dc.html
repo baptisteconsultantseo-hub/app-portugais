@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#EDEBE6;font-family:'Public Sans',system-ui,sans-serif}
+input{font-family:'Public Sans',system-ui,sans-serif}
+input:focus{outline:none}
+a{color:#006633;text-decoration:none}
+a:hover{color:#004422}
+::-webkit-scrollbar{width:0;height:0}
+@keyframes ptFade{from{opacity:0}to{opacity:1}}
+@keyframes ptToast{0%{opacity:0;transform:translateY(6px)}12%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div ref="{{ rootRef }}" style="background:#FFFFFF;min-height:100%;padding-top:54px">
+
+<sc-if value="{{ isCloud }}" hint-placeholder-val="{{ true }}">
+<div style="animation:ptFade .08s ease-out">
+<div style="position:sticky;top:54px;z-index:5;background:#FFFFFF;padding:8px 22px 12px;border-bottom:1px solid rgba(0,102,51,0.09)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:4px 0 14px">
+<div style="font:600 11px/1 'Public Sans',sans-serif;letter-spacing:0.14em;text-transform:uppercase;color:#006633">Conjugação PT-PT</div>
+<div style="font:400 10px/1 'Public Sans',sans-serif;letter-spacing:0.04em;color:#6B7280">{{ countLabel }}</div>
+</div>
+<div style="display:flex;align-items:center;gap:9px;padding-bottom:12px;border-bottom:1px solid rgba(0,102,51,0.16)">
+<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#006633" stroke-width="2.2"><circle cx="10.5" cy="10.5" r="7"></circle><path d="M16 16l5 5"></path></svg>
+<input type="text" value="{{ query }}" onChange="{{ onQuery }}" placeholder="Verbe ou traduction…" style="flex:1;border:none;padding:0;font-size:16px;font-weight:400;color:#1F2937;background:transparent"></input>
+<sc-if value="{{ hasQuery }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ clearQuery }}" style="font:400 11px/1 'Public Sans',sans-serif;color:#6B7280;cursor:pointer;padding:2px 4px">effacer</div>
+</sc-if>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:12px">
+<div style="display:flex;gap:6px">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+<div onClick="{{ f.onClick }}" style="{{ f.style }}">{{ f.label }}</div>
+</sc-for>
+</div>
+<div onClick="{{ toggleMode }}" style="display:flex;align-items:center;gap:5px;cursor:pointer;padding:7px 10px;border-radius:99px;border:1px solid rgba(0,102,51,0.2);font:500 10px/1 'Public Sans',sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:#006633">{{ modeLabel }}</div>
+</div>
+</div>
+
+<sc-if value="{{ isCloudMode }}" hint-placeholder-val="{{ true }}">
+<div>
+<div style="display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:0px 11px;padding:20px 18px 26px">
+<sc-for list="{{ cloud }}" as="v" hint-placeholder-count="42">
+<div onClick="{{ v.onClick }}" style="{{ v.style }}" style-active="{{ v.activeStyle }}">{{ v.infinitif }}<sc-if value="{{ v.irregular }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;width:4px;height:4px;border-radius:99px;background:#B22222;vertical-align:super;margin-left:2px"></span></sc-if></div>
+</sc-for>
+</div>
+<div style="display:flex;align-items:center;justify-content:center;gap:7px;padding:0 26px 46px;font:400 10px/1 'Public Sans',sans-serif;color:#6B7280">
+<span style="display:inline-block;width:4px;height:4px;border-radius:99px;background:#B22222"></span>irrégulier · la taille indique la fréquence
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isListMode }}" hint-placeholder-val="{{ false }}">
+<div style="padding:6px 22px 48px">
+<sc-for list="{{ rows }}" as="v" hint-placeholder-count="12">
+<div onClick="{{ v.onClick }}" style="display:flex;align-items:baseline;gap:10px;padding:14px 0;border-bottom:1px solid rgba(0,102,51,0.08);cursor:pointer" style-active="{{ v.activeStyle }}">
+<span style="font:400 19px/1 'Instrument Serif',serif;color:#004422">{{ v.infinitif }}</span>
+<sc-if value="{{ v.irregular }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block;width:4px;height:4px;border-radius:99px;background:#B22222;align-self:center"></span></sc-if>
+<span style="flex:1;font:400 12px/1 'Public Sans',sans-serif;color:#6B7280;text-align:right">{{ v.fr }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 26px 40px;text-align:center;font:400 13px/1.5 'Public Sans',sans-serif;color:#6B7280">Aucun verbe ne correspond.</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVerb }}" hint-placeholder-val="{{ false }}">
+<div style="animation:ptFade .08s ease-out">
+<div style="position:sticky;top:54px;z-index:5;background:#FFFFFF;padding:10px 22px 14px;border-bottom:1px solid rgba(0,102,51,0.09)">
+<div onClick="{{ onBack }}" style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;padding:4px 0;font:500 11px/1 'Public Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:#006633">
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#006633" stroke-width="2.4"><path d="M14 5l-7 7 7 7"></path></svg>Tous les verbes
+</div>
+<div style="display:flex;align-items:baseline;gap:10px;padding-top:12px">
+<div style="font:400 40px/1 'Instrument Serif',serif;color:#004422">{{ verbInf }}</div>
+<div style="font:400 15px/1 'Instrument Serif',serif;font-style:italic;color:#6B7280">{{ verbFr }}</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;padding-top:11px">
+<span style="{{ tagStyle }}">{{ verbTag }}</span>
+<sc-if value="{{ hasModel }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ onModel }}" style="font:400 11px/1 'Public Sans',sans-serif;color:#6B7280;cursor:pointer">se conjugue comme <span style="color:#006633;font-weight:600;border-bottom:1px solid rgba(0,102,51,0.3)">{{ modelInf }}</span></div>
+</sc-if>
+</div>
+</div>
+
+<div style="padding:0 22px 24px">
+<sc-if value="{{ verbNote }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:16px;padding:11px 13px;background:#EAF4FB;border-radius:10px;font:400 12px/1.45 'Public Sans',sans-serif;color:#1F2937">{{ verbNote }}</div>
+</sc-if>
+
+<sc-for list="{{ blocks }}" as="b" hint-placeholder-count="4">
+<div onPointerDown="{{ b.onHoldStart }}" onPointerUp="{{ b.onHoldEnd }}" onPointerLeave="{{ b.onHoldEnd }}" style="padding-top:26px">
+<sc-if value="{{ b.warn }}" hint-placeholder-val="{{ false }}">
+<div style="margin-bottom:18px;padding:13px 14px;background:#FEF3E2;border-radius:12px">
+<div style="font:700 11px/1 'Public Sans',sans-serif;letter-spacing:0.08em;text-transform:uppercase;color:#B22222">Attention faux ami</div>
+<div style="padding-top:7px;font:400 12px/1.5 'Public Sans',sans-serif;color:#1F2937">Ce temps ne se traduit pas par le passé composé français. Il exprime une action habituelle ou continue commencée dans le passé et qui dure encore aujourd’hui.</div>
+<div style="padding-top:9px;display:flex;flex-direction:column;gap:5px;font:400 12px/1.45 'Public Sans',sans-serif;color:#1F2937">
+<div><span style="color:#006633;font-weight:600">{{ b.exGood }}</span> → {{ b.exGoodFr }}</div>
+<div><span style="color:#B22222;font-weight:600">{{ b.exBad }}</span> → {{ b.exBadFr }}</div>
+</div>
+</div>
+</sc-if>
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:10px;border-bottom:1px solid rgba(0,102,51,0.18)">
+<div style="display:flex;align-items:baseline;gap:7px">
+<div style="font:600 11px/1.2 'Public Sans',sans-serif;letter-spacing:0.1em;text-transform:uppercase;color:#006633">{{ b.label }}</div>
+<sc-if value="{{ b.regular }}" hint-placeholder-val="{{ false }}">
+<div style="font:500 9px/1 'Public Sans',sans-serif;letter-spacing:0.06em;text-transform:uppercase;color:#006633;background:#F1F8F4;padding:4px 6px;border-radius:99px;white-space:nowrap">régulier</div>
+</sc-if>
+</div>
+<div style="font:400 10px/1.2 'Public Sans',sans-serif;font-style:italic;color:#6B7280;text-align:right">{{ b.hint }}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:16px;padding-top:4px">
+<sc-for list="{{ b.cells }}" as="c" hint-placeholder-count="6">
+<div style="{{ c.style }}">
+<span style="{{ c.pStyle }}">{{ c.p }}</span>
+<span style="font:400 15px/1.2 'Public Sans',sans-serif;color:#1F2937;letter-spacing:-0.01em"><span style="color:#6B7280">{{ c.pre }}</span>{{ c.r }}<span style="color:#B22222;font-weight:700">{{ c.t }}</span><sc-if value="{{ c.amb }}" hint-placeholder-val="{{ false }}"><span style="color:#B8860B;font-weight:600;font-size:11px;vertical-align:super;margin-left:2px">≡</span></sc-if></span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ b.ambNote }}" hint-placeholder-val="{{ false }}">
+<div style="padding-top:8px;font:400 10px/1.4 'Public Sans',sans-serif;color:#6B7280"><span style="color:#B8860B;font-weight:600">≡</span> forme identique au Presente : c’est le contexte qui tranche.</div>
+</sc-if>
+</div>
+</sc-for>
+
+<div style="display:flex;gap:8px;padding-top:30px">
+<div onClick="{{ onPrev }}" style="flex:1;display:flex;align-items:center;gap:7px;padding:14px 13px;border-radius:12px;background:#F1F8F4;cursor:pointer;min-height:48px;box-sizing:border-box">
+<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#006633" stroke-width="2.4"><path d="M14 5l-7 7 7 7"></path></svg>
+<span style="font:400 16px/1 'Instrument Serif',serif;color:#004422">{{ prevInf }}</span>
+</div>
+<div onClick="{{ onNext }}" style="flex:1;display:flex;align-items:center;justify-content:flex-end;gap:7px;padding:14px 13px;border-radius:12px;background:#F1F8F4;cursor:pointer;min-height:48px;box-sizing:border-box">
+<span style="font:400 16px/1 'Instrument Serif',serif;color:#004422">{{ nextInf }}</span>
+<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#006633" stroke-width="2.4"><path d="M10 5l7 7-7 7"></path></svg>
+</div>
+</div>
+<div style="padding:12px 2px 46px;font:400 10px/1.4 'Public Sans',sans-serif;color:#6B7280">Appui long sur un tableau pour copier la conjugaison.</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:44px;display:flex;justify-content:center;pointer-events:none;z-index:30">
+<div style="background:#004422;color:#FFFFFF;font:500 11px/1 'Public Sans',sans-serif;letter-spacing:0.04em;padding:11px 16px;border-radius:99px;animation:ptToast 1.6s ease-out forwards">{{ toast }}</div>
+</div>
+</sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:460,&quot;height&quot;:940},&quot;showFalseFriend&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;defaultFilter&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Tous&quot;,&quot;Réguliers&quot;,&quot;Irréguliers&quot;],&quot;default&quot;:&quot;Tous&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Contenu&quot;},&quot;cloudScale&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;min&quot;:0.8,&quot;max&quot;:1.4,&quot;step&quot;:0.05,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Nuage&quot;}}">
+const AUX = ['tenho ', 'tens ', 'tem ', 'temos ', 'tendes ', 'têm '];
+const FUT = ['ei', 'ás', 'á', 'emos', 'eis', 'ão'];
+const END = {
+  ar: { pres: ['o','as','a','amos','ais','am'], pps: ['ei','aste','ou','ámos','astes','aram'], part: 'ado' },
+  er: { pres: ['o','es','e','emos','eis','em'], pps: ['i','este','eu','emos','estes','eram'], part: 'ido' },
+  ir: { pres: ['o','es','e','imos','is','em'], pps: ['i','iste','iu','imos','istes','iram'], part: 'ido' }
+};
+const PRON = ['eu', 'tu', 'ele', 'nós', 'vós', 'eles'];
+const ORDER = [0, 3, 1, 4, 2, 5];
+const MODEL = { ar: 'falar', er: 'comer', ir: 'partir' };
+
+const REG = [
+  ['falar','parler',9],['gostar','aimer',8],['estudar','étudier',7],['trabalhar','travailler',7],
+  ['chegar','arriver',7],['começar','commencer',7],['ficar','rester',7],['morar','habiter',6],
+  ['passar','passer',6],['tomar','prendre',6],['comprar','acheter',6],['pagar','payer',6],
+  ['andar','marcher',5],['viajar','voyager',5],['ajudar','aider',5],['procurar','chercher',5],
+  ['cantar','chanter',4],['amar','aimer',4],
+  ['comer','manger',7],['beber','boire',6],['viver','vivre',6],['aprender','apprendre',6],
+  ['escrever','écrire',6,'escrito'],['entender','comprendre',6],['correr','courir',5],
+  ['vender','vendre',5],['receber','recevoir',5],
+  ['abrir','ouvrir',6,'aberto'],['partir','partir',5],['decidir','décider',5],
+  ['assistir','assister',4],['dividir','diviser',4],['permitir','permettre',4],['discutir','discuter',4]
+];
+
+const IRR = [
+  ['ser','être',10,['sou','és','é','somos','sois','são'],['fui','foste','foi','fomos','fostes','foram'],null,'sido','ser = état permanent · estar = état temporaire.'],
+  ['estar','être (état, lieu)',10,['estou','estás','está','estamos','estais','estão'],['estive','estiveste','esteve','estivemos','estivestes','estiveram'],null,'estado',null],
+  ['ter','avoir',10,['tenho','tens','tem','temos','tendes','têm'],['tive','tiveste','teve','tivemos','tivestes','tiveram'],null,'tido','Auxiliaire de tous les temps composés.'],
+  ['ir','aller',9,['vou','vais','vai','vamos','ides','vão'],['fui','foste','foi','fomos','fostes','foram'],null,'ido','Passé simple identique à celui de ser.'],
+  ['fazer','faire',9,['faço','fazes','faz','fazemos','fazeis','fazem'],['fiz','fizeste','fez','fizemos','fizestes','fizeram'],['farei','farás','fará','faremos','fareis','farão'],'feito',null],
+  ['poder','pouvoir',9,['posso','podes','pode','podemos','podeis','podem'],['pude','pudeste','pôde','pudemos','pudestes','puderam'],null,'podido',null],
+  ['querer','vouloir',9,['quero','queres','quer','queremos','quereis','querem'],['quis','quiseste','quis','quisemos','quisestes','quiseram'],null,'querido',null],
+  ['vir','venir',8,['venho','vens','vem','vimos','vindes','vêm'],['vim','vieste','veio','viemos','viestes','vieram'],null,'vindo',null],
+  ['dizer','dire',8,['digo','dizes','diz','dizemos','dizeis','dizem'],['disse','disseste','disse','dissemos','dissestes','disseram'],['direi','dirás','dirá','diremos','direis','dirão'],'dito',null],
+  ['dar','donner',8,['dou','dás','dá','damos','dais','dão'],['dei','deste','deu','demos','destes','deram'],null,'dado',null],
+  ['ver','voir',8,['vejo','vês','vê','vemos','vedes','veem'],['vi','viste','viu','vimos','vistes','viram'],null,'visto',null],
+  ['saber','savoir',8,['sei','sabes','sabe','sabemos','sabeis','sabem'],['soube','soubeste','soube','soubemos','soubestes','souberam'],null,'sabido',null],
+  ['pôr','mettre',7,['ponho','pões','põe','pomos','pondes','põem'],['pus','puseste','pôs','pusemos','pusestes','puseram'],['porei','porás','porá','poremos','poreis','porão'],'posto','« ponhar » n’existe pas : l’infinitif est pôr.'],
+  ['pedir','demander',7,['peço','pedes','pede','pedimos','pedis','pedem'],null,null,'pedido',null],
+  ['conseguir','réussir à',7,['consigo','consegues','consegue','conseguimos','conseguis','conseguem'],null,null,'conseguido',null],
+  ['conhecer','connaître',7,['conheço','conheces','conhece','conhecemos','conheceis','conhecem'],null,null,'conhecido','c → ç devant o.'],
+  ['trazer','apporter',6,['trago','trazes','traz','trazemos','trazeis','trazem'],['trouxe','trouxeste','trouxe','trouxemos','trouxestes','trouxeram'],['trarei','trarás','trará','traremos','trareis','trarão'],'trazido',null],
+  ['ouvir','entendre',6,['ouço','ouves','ouve','ouvimos','ouvis','ouvem'],null,null,'ouvido',null],
+  ['sair','sortir',6,['saio','sais','sai','saímos','saís','saem'],['saí','saíste','saiu','saímos','saístes','saíram'],null,'saído',null],
+  ['ler','lire',6,['leio','lês','lê','lemos','ledes','leem'],null,null,'lido',null],
+  ['perder','perdre',6,['perco','perdes','perde','perdemos','perdeis','perdem'],null,null,'perdido',null],
+  ['sentir','sentir',6,['sinto','sentes','sente','sentimos','sentis','sentem'],null,null,'sentido','e → i à la 1re personne.'],
+  ['dormir','dormir',6,['durmo','dormes','dorme','dormimos','dormis','dormem'],null,null,'dormido','o → u à la 1re personne.'],
+  ['haver','y avoir',5,['hei','hás','há','havemos','haveis','hão'],['houve','houveste','houve','houvemos','houvestes','houveram'],null,'havido','Surtout à la 3e personne : há = il y a.'],
+  ['cair','tomber',5,['caio','cais','cai','caímos','caís','caem'],['caí','caíste','caiu','caímos','caístes','caíram'],null,'caído',null],
+  ['subir','monter',5,['subo','sobes','sobe','subimos','subis','sobem'],null,null,'subido','u → o à tu / ele / eles.']
+];
+
+const TAGS = { regulier_ar: 'Régulier · -AR', regulier_er: 'Régulier · -ER', regulier_ir: 'Régulier · -IR', irregulier: 'Irrégulier' };
+const BLOCKS = [
+  ['presente', 'Presente', 'présent'],
+  ['pps', 'Pretérito Perfeito Simples', 'action terminée · le vrai « j’ai fait »'],
+  ['futuro', 'Futuro', 'futur simple'],
+  ['composto', 'Pretérito Perfeito Composto', 'action qui dure encore · pas « j’ai fait »']
+];
+
+function orth(stem) {
+  if (stem.endsWith('ç')) return stem.slice(0, -1) + 'c';
+  if (stem.endsWith('g')) return stem + 'u';
+  if (stem.endsWith('c')) return stem.slice(0, -1) + 'qu';
+  return stem;
+}
+function full(list) { return list.map(f => ({ pre: '', r: f, t: '' })); }
+function regularTense(inf, kind) {
+  const g = inf.slice(-2), stem = inf.slice(0, -2), e = END[g];
+  if (kind === 'presente') return e.pres.map(t => ({ pre: '', r: stem, t }));
+  return e.pps.map((t, i) => ({ pre: '', r: (g === 'ar' && i === 0) ? orth(stem) : stem, t }));
+}
+function futuroOf(inf) { return FUT.map(t => ({ pre: '', r: inf, t })); }
+function compostoOf(inf, override) {
+  const g = inf.slice(-2), stem = inf.slice(0, -2), e = END[g];
+  if (override) return AUX.map(a => ({ pre: a, r: override, t: '' }));
+  return AUX.map(a => ({ pre: a, r: stem, t: e.part }));
+}
+function txt(f) { return f.pre + f.r + f.t; }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function fold(s) { return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+
+function decorate(v) {
+  v.part = txt(v.conj.composto[0]).replace(AUX[0], '');
+  // formes ambiguës : nós identique au Presente et au Pretérito Perfeito Simples
+  v.amb = ORDER.map(() => false);
+  v.ambNos = txt(v.conj.presente[3]) === txt(v.conj.pps[3]);
+  return v;
+}
+
+function buildAll() {
+  const out = [];
+  REG.forEach(([inf, fr, freq, part]) => {
+    const g = inf.slice(-2);
+    out.push(decorate({
+      infinitif: inf, fr, freq, categorie: 'regulier_' + g, irregular: false, note: null,
+      model: inf === MODEL[g] ? null : MODEL[g], regTenses: {},
+      conj: {
+        presente: regularTense(inf, 'presente'), pps: regularTense(inf, 'pps'),
+        futuro: futuroOf(inf), composto: compostoOf(inf, part)
+      }
+    }));
+  });
+  IRR.forEach(([inf, fr, freq, pres, pps, fut, part, note]) => {
+    out.push(decorate({
+      infinitif: inf, fr, freq, categorie: 'irregulier', irregular: true, note,
+      model: null, regTenses: { pps: !pps, futuro: !fut },
+      conj: {
+        presente: full(pres),
+        pps: pps ? full(pps) : regularTense(inf, 'pps'),
+        futuro: fut ? full(fut) : futuroOf(inf),
+        composto: compostoOf(inf, part)
+      }
+    }));
+  });
+  let s = 7;
+  return out.map(v => { s = (s * 9301 + 49297) % 233280; return { v, k: s }; })
+    .sort((a, b) => a.k - b.k).map(o => o.v);
+}
+
+const FILTERS = ['Tous', 'Réguliers', 'Irréguliers'];
+const LS = 'ptconj.v1';
+
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.all = buildAll();
+    this.alpha = this.all.slice().sort((a, b) => a.infinitif.localeCompare(b.infinitif, 'pt'));
+    let saved = {};
+    try { saved = JSON.parse(window.localStorage.getItem(LS) || '{}') || {}; } catch (e) { saved = {}; }
+    const restored = saved.verb ? this.all.find(v => v.infinitif === saved.verb) : null;
+    this.state = {
+      view: restored ? 'verb' : 'cloud',
+      verb: restored || null,
+      q: '',
+      mode: saved.mode === 'list' ? 'list' : 'cloud',
+      filter: FILTERS.includes(saved.filter) ? saved.filter : (FILTERS.includes(props.defaultFilter) ? props.defaultFilter : 'Tous'),
+      toast: null
+    };
+    this.rootRef = React.createRef();
+  }
+  save(patch) {
+    const s = Object.assign({ filter: this.state.filter, mode: this.state.mode, verb: this.state.verb ? this.state.verb.infinitif : null }, patch);
+    try { window.localStorage.setItem(LS, JSON.stringify(s)); } catch (e) {}
+  }
+  toTop() {
+    requestAnimationFrame(() => {
+      const el = this.rootRef.current;
+      if (el && el.parentElement) el.parentElement.scrollTop = 0;
+    });
+  }
+  open(v, keepScroll) {
+    this.setState({ view: 'verb', verb: v });
+    this.save({ verb: v.infinitif });
+    if (!keepScroll) this.toTop();
+  }
+  back() {
+    this.setState({ view: 'cloud', verb: null });
+    this.save({ verb: null });
+    this.toTop();
+  }
+  step(dir) {
+    const i = this.alpha.indexOf(this.state.verb);
+    const n = this.alpha[(i + dir + this.alpha.length) % this.alpha.length];
+    this.open(n);
+  }
+  flash(msg) {
+    clearTimeout(this._t);
+    this.setState({ toast: msg });
+    this._t = setTimeout(() => this.setState({ toast: null }), 1500);
+  }
+  copyBlock(label, key) {
+    const v = this.state.verb;
+    if (!v) return;
+    const lines = PRON.map((p, i) => p + ' ' + txt(v.conj[key][i]));
+    const text = v.infinitif + ' — ' + label + '\n' + lines.join('\n');
+    const done = () => this.flash('Conjugaison copiée');
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, done);
+      else done();
+    } catch (e) { done(); }
+  }
+  componentWillUnmount() { clearTimeout(this._t); clearTimeout(this._hold); }
+  renderVals() {
+    const scale = this.props.cloudScale ?? 1;
+    const q = fold(this.state.q.trim());
+    const f = this.state.filter;
+    const list = this.all.filter(v => {
+      if (f === 'Réguliers' && v.irregular) return false;
+      if (f === 'Irréguliers' && !v.irregular) return false;
+      return !q || fold(v.infinitif).includes(q) || fold(v.fr).includes(q);
+    });
+    const cloud = list.map(v => {
+      const size = Math.round((15 + (v.freq - 4) * 3.1) * scale);
+      const color = v.freq >= 8 ? '#004422' : v.freq >= 6 ? '#006633' : '#6B7280';
+      return {
+        infinitif: v.infinitif, irregular: v.irregular,
+        onClick: () => this.open(v),
+        style: { font: '400 ' + size + 'px/1.05 "Instrument Serif", serif', color, cursor: 'pointer', padding: '10px 4px', transition: 'opacity .12s' },
+        activeStyle: { opacity: 0.45 }
+      };
+    });
+    const rows = this.alpha.filter(v => list.indexOf(v) !== -1).map(v => ({
+      infinitif: v.infinitif, fr: v.fr, irregular: v.irregular,
+      onClick: () => this.open(v), activeStyle: { background: '#F1F8F4' }
+    }));
+    const v = this.state.verb;
+    const ai = v ? this.alpha.indexOf(v) : 0;
+    const blocks = !v ? [] : BLOCKS.map(([key, label, hint]) => {
+      const amb = key === 'presente' || key === 'pps' ? v.ambNos : false;
+      return {
+        label, hint,
+        regular: v.irregular && !!v.regTenses[key],
+        warn: key === 'composto' && (this.props.showFalseFriend ?? true),
+        exGood: cap(txt(v.conj.composto[0])) + '.',
+        exGoodFr: '« ' + v.fr +' » de façon répétée, jusqu’à aujourd’hui.',
+        exBad: cap(txt(v.conj.pps[0])) + '.',
+        exBadFr: 'voilà le « j’ai fait » français : action terminée, au Pretérito Perfeito Simples.',
+        ambNote: amb,
+        onHoldStart: () => { clearTimeout(this._hold); this._hold = setTimeout(() => this.copyBlock(label, key), 550); },
+        onHoldEnd: () => clearTimeout(this._hold),
+        cells: ORDER.map(i => ({
+          p: PRON[i], pre: v.conj[key][i].pre, r: v.conj[key][i].r, t: v.conj[key][i].t,
+          amb: amb && i === 3,
+          style: {
+            display: 'flex', alignItems: 'baseline', gap: 8, padding: '9px 0',
+            borderBottom: '1px solid rgba(0,102,51,0.07)', opacity: i === 4 ? 0.55 : 1
+          },
+          pStyle: {
+            font: '600 11px/1 "Public Sans", sans-serif', letterSpacing: '0.03em',
+            color: '#B8860B', minWidth: 28
+          }
+        }))
+      };
+    });
+    return {
+      isCloud: this.state.view === 'cloud', isVerb: this.state.view === 'verb',
+      isCloudMode: this.state.mode === 'cloud', isListMode: this.state.mode === 'list',
+      modeLabel: this.state.mode === 'cloud' ? 'Liste' : 'Nuage',
+      toggleMode: () => {
+        const m = this.state.mode === 'cloud' ? 'list' : 'cloud';
+        this.setState({ mode: m }); this.save({ mode: m });
+      },
+      isEmpty: list.length === 0, cloud, rows, rootRef: this.rootRef,
+      query: this.state.q, hasQuery: this.state.q.length > 0,
+      onQuery: e => this.setState({ q: e.target.value }),
+      clearQuery: () => this.setState({ q: '' }),
+      countLabel: list.length + (list.length > 1 ? ' verbes' : ' verbe'),
+      filters: FILTERS.map(label => ({
+        label,
+        onClick: () => { this.setState({ filter: label }); this.save({ filter: label }); },
+        style: {
+          font: '500 11px/1 "Public Sans", sans-serif', letterSpacing: '0.04em', cursor: 'pointer',
+          padding: '7px 12px', borderRadius: 99,
+          background: f === label ? '#006633' : '#F1F8F4',
+          color: f === label ? '#FFFFFF' : '#006633'
+        }
+      })),
+      verbInf: v ? v.infinitif : '', verbFr: v ? v.fr : '', verbNote: v ? v.note : null,
+      verbTag: v ? TAGS[v.categorie] : '',
+      hasModel: !!(v && v.model), modelInf: v && v.model ? v.model : '',
+      onModel: () => { const m = this.all.find(x => x.infinitif === (v && v.model)); if (m) this.open(m); },
+      tagStyle: {
+        font: '600 10px/1 "Public Sans", sans-serif', letterSpacing: '0.1em', textTransform: 'uppercase',
+        padding: '5px 9px', borderRadius: 99,
+        background: v && v.irregular ? '#FEF3E2' : '#F1F8F4',
+        color: v && v.irregular ? '#B22222' : '#006633'
+      },
+      blocks,
+      prevInf: v ? this.alpha[(ai - 1 + this.alpha.length) % this.alpha.length].infinitif : '',
+      nextInf: v ? this.alpha[(ai + 1) % this.alpha.length].infinitif : '',
+      onPrev: () => this.step(-1), onNext: () => this.step(1),
+      toast: this.state.toast,
+      onBack: () => this.back()
+    };
+  }
+}
+</script>
+</body>
+</html>
