@@ -1,0 +1,82 @@
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --content-top: calc(var(--safe-top) + 20px);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  background: #EDEBE6;
+}
+
+body {
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+
+input {
+  font-family: 'Public Sans', system-ui, sans-serif;
+}
+
+input:focus {
+  outline: none;
+}
+
+a {
+  color: #006633;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #004422;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+@keyframes ptFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ptToast {
+  0% { opacity: 0; transform: translateY(6px); }
+  12% { opacity: 1; transform: none; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.pt-app-shell {
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+}
+
+.pt-app {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  min-height: 100dvh;
+  background: #FFFFFF;
+  padding-top: var(--content-top);
+  padding-bottom: var(--safe-bottom);
+}
+
+@media (min-width: 500px) {
+  .pt-app-shell {
+    align-items: center;
+    padding: 40px 20px;
+  }
+  .pt-app {
+    min-height: 874px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 28px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.16);
+  }
+}
