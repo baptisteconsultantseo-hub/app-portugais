@@ -482,7 +482,7 @@ function ExercisePanel({ verb }) {
       {q && (
         <div style={{ paddingTop: 16 }}>
           <div style={{ font: "500 9px/1 'Public Sans',sans-serif", letterSpacing: '0.06em', textTransform: 'uppercase', color: '#006633', background: '#F1F8F4', display: 'inline-block', padding: '4px 8px', borderRadius: 99 }}>
-            {label}
+            {verb.infinitif} · {label}
           </div>
           <div style={{ paddingTop: 12, font: "400 17px/1.4 'Instrument Serif',serif", color: '#1F2937' }}>
             {adv}, <span style={{ color: '#B8860B', fontWeight: 600 }}>{PRON[q.i]}</span> ___.
