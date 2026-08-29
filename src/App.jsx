@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { buildAll, PRON, ORDER, TAGS, BLOCKS, txt, cap, fold, FILTERS } from './verbs';
+import { buildAll, PRON, ORDER, TAGS, BLOCKS, TENSE_ADV, txt, cap, fold, FILTERS } from './verbs';
 
 const LS = 'ptconj.v1';
 const SHOW_FALSE_FRIEND = true;
@@ -391,6 +391,8 @@ function VerbCard({ verb: v, all, prevVerb, nextVerb, onBack, onOpen, onPrev, on
           );
         })}
 
+        <ExercisePanel verb={v} key={v.infinitif} />
+
         <div style={{ display: 'flex', gap: 8, paddingTop: 30 }}>
           <div onClick={onPrev} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 7, padding: '14px 13px', borderRadius: 12, background: '#F1F8F4', cursor: 'pointer', minHeight: 48, boxSizing: 'border-box' }}>
             <PrevIcon /><span style={{ font: "400 16px/1 'Instrument Serif',serif", color: '#004422' }}>{prevVerb ? prevVerb.infinitif : ''}</span>
@@ -403,6 +405,135 @@ function VerbCard({ verb: v, all, prevVerb, nextVerb, onBack, onOpen, onPrev, on
           Appui long sur un tableau pour copier la conjugaison.
         </div>
       </div>
+    </div>
+  );
+}
+
+function ExercisePanel({ verb }) {
+  const [active, setActive] = useState(false);
+  const [questions, setQuestions] = useState([]);
+  const [qIndex, setQIndex] = useState(0);
+  const [input, setInput] = useState('');
+  const [checked, setChecked] = useState(false);
+  const [results, setResults] = useState([]);
+
+  function start() {
+    const pool = [];
+    BLOCKS.forEach(([key]) => ORDER.forEach((i) => pool.push({ key, i })));
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    setQuestions(pool.slice(0, 5));
+    setQIndex(0);
+    setInput('');
+    setChecked(false);
+    setResults([]);
+    setActive(true);
+  }
+
+  function check() {
+    if (checked || !input.trim()) return;
+    const q = questions[qIndex];
+    const correct = txt(verb.conj[q.key][q.i]);
+    const ok = input.trim().toLowerCase() === correct.toLowerCase();
+    setResults((r) => [...r, { ok, correct }]);
+    setChecked(true);
+  }
+
+  function next() {
+    setQIndex(qIndex + 1);
+    setInput('');
+    setChecked(false);
+  }
+
+  const finished = active && qIndex >= questions.length;
+  const q = active && !finished ? questions[qIndex] : null;
+  const label = q ? BLOCKS.find(([key]) => key === q.key)[1] : null;
+  const adv = q ? TENSE_ADV[q.key] : null;
+  const last = results[results.length - 1];
+  const pillStyle = {
+    display: 'inline-block', font: "500 11px/1 'Public Sans',sans-serif", letterSpacing: '0.06em',
+    textTransform: 'uppercase', padding: '11px 18px', borderRadius: 99, cursor: 'pointer',
+  };
+
+  return (
+    <div style={{ paddingTop: 30 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, paddingBottom: 14, borderBottom: '1px solid rgba(0,102,51,0.18)' }}>
+        <div style={{ font: "600 11px/1.2 'Public Sans',sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase', color: '#006633' }}>
+          Entraînement
+        </div>
+        {active && !finished && (
+          <div style={{ font: "400 10px/1.2 'Public Sans',sans-serif", color: '#6B7280' }}>{qIndex + 1} / {questions.length}</div>
+        )}
+      </div>
+
+      {!active && (
+        <div style={{ paddingTop: 14 }}>
+          <div style={{ font: "400 12px/1.5 'Public Sans',sans-serif", color: '#6B7280', paddingBottom: 12 }}>
+            5 phrases à trou pour t’entraîner sur « {verb.infinitif} », temps et personnes mélangés.
+          </div>
+          <div onClick={start} style={{ ...pillStyle, color: '#FFFFFF', background: '#006633' }}>
+            Commencer
+          </div>
+        </div>
+      )}
+
+      {q && (
+        <div style={{ paddingTop: 16 }}>
+          <div style={{ font: "500 9px/1 'Public Sans',sans-serif", letterSpacing: '0.06em', textTransform: 'uppercase', color: '#006633', background: '#F1F8F4', display: 'inline-block', padding: '4px 8px', borderRadius: 99 }}>
+            {label}
+          </div>
+          <div style={{ paddingTop: 12, font: "400 17px/1.4 'Instrument Serif',serif", color: '#1F2937' }}>
+            {adv}, <span style={{ color: '#B8860B', fontWeight: 600 }}>{PRON[q.i]}</span> ___.
+          </div>
+          <input
+            type="text"
+            value={input}
+            disabled={checked}
+            autoFocus
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') { checked ? next() : check(); } }}
+            placeholder="conjugue le verbe…"
+            style={{ marginTop: 14, width: '100%', boxSizing: 'border-box', border: '1px solid rgba(0,102,51,0.25)', borderRadius: 10, padding: '11px 13px', fontSize: 16, color: '#1F2937', background: checked ? '#FAFAFA' : '#FFFFFF' }}
+          />
+          {checked && (
+            <div style={{ paddingTop: 10, font: "400 13px/1.4 'Public Sans',sans-serif", color: last.ok ? '#006633' : '#B22222' }}>
+              {last.ok ? 'Correct !' : <>Réponse : <strong>{last.correct}</strong></>}
+            </div>
+          )}
+          <div style={{ paddingTop: 14 }}>
+            {!checked ? (
+              <div onClick={check} style={{ ...pillStyle, color: '#006633', background: '#F1F8F4' }}>
+                Vérifier
+              </div>
+            ) : (
+              <div onClick={next} style={{ ...pillStyle, color: '#FFFFFF', background: '#006633' }}>
+                {qIndex + 1 >= questions.length ? 'Voir le score' : 'Suivant'}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {finished && (
+        <div style={{ paddingTop: 16 }}>
+          <div style={{ font: "400 30px/1 'Instrument Serif',serif", color: '#004422' }}>
+            {results.filter((r) => r.ok).length} / {results.length}
+          </div>
+          <div style={{ paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {results.map((r, idx) => (
+              <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', gap: 10, font: "400 12px/1.4 'Public Sans',sans-serif", color: '#1F2937' }}>
+                <span>{BLOCKS.find(([key]) => key === questions[idx].key)[1]} · {PRON[questions[idx].i]}</span>
+                <span style={{ color: r.ok ? '#006633' : '#B22222', fontWeight: 600 }}>{r.correct}</span>
+              </div>
+            ))}
+          </div>
+          <div onClick={start} style={{ ...pillStyle, marginTop: 16, color: '#006633', background: '#F1F8F4' }}>
+            Recommencer
+          </div>
+        </div>
+      )}
     </div>
   );
 }

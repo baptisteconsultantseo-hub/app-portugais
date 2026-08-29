@@ -123,3 +123,11 @@ export function buildAll() {
 }
 
 export const FILTERS = ['Tous', 'Réguliers', 'Irréguliers'];
+
+// Adverbe qui ancre chaque temps dans son sens, utilisé pour générer les phrases d'entraînement.
+export const TENSE_ADV = {
+  presente: 'Normalmente',
+  pps: 'Ontem',
+  futuro: 'Amanhã',
+  composto: 'Ultimamente',
+};
